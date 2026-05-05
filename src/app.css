@@ -1,0 +1,212 @@
+/* ============================================================
+   Taskly — Globale Styles
+   ============================================================
+   Zentrale CSS-Variablen, Reset und wiederverwendbare Klassen.
+   Alle Bezeichnungen auf Deutsch.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   1. CSS-Variablen (Designsystem)
+   ------------------------------------------------------------ */
+:root {
+  /* --- Primärfarbe (Teal) und Varianten --- */
+  --farbe-primaer: #01696f;
+  --farbe-primaer-hell: #f0f9f9;
+  --farbe-primaer-mittel: #d0eeec;
+  --farbe-primaer-akzent: #c0e8e6;
+
+  /* --- Text-Farben (von dunkel nach hell) --- */
+  --farbe-text: #1a1a2e;
+  --farbe-text-mittel: #555;
+  --farbe-text-hell: #888;
+  --farbe-text-sehr-hell: #aaa;
+  --farbe-text-extra-hell: #bbb;
+
+  /* --- Hintergrund-Farben --- */
+  --farbe-hg-weiss: #fff;
+  --farbe-hg-grau: #fafafa;
+  --farbe-hg-grauer: #f5f5f5;
+
+  /* --- Border-Farben --- */
+  --farbe-border-leicht: #f0f0f0;
+  --farbe-border: #e0e0e0;
+  --farbe-border-stark: #ddd;
+
+  /* --- Kategorie: Arbeit (blau) --- */
+  --kat-arbeit-bg: #e8f4ff;
+  --kat-arbeit-text: #0070cc;
+  --kat-arbeit-dot: #0080ff;
+
+  /* --- Kategorie: Schule (grün) --- */
+  --kat-schule-bg: #edfff3;
+  --kat-schule-text: #00994d;
+  --kat-schule-dot: #00cc66;
+
+  /* --- Kategorie: Privat (orange) --- */
+  --kat-privat-bg: #fff3e8;
+  --kat-privat-text: #cc6600;
+  --kat-privat-dot: #ff9933;
+
+  /* --- Status-Farben --- */
+  --farbe-fehler: #cc4444;
+  --farbe-fehler-bg: #fff0f0;
+  --farbe-erfolg: #00994d;
+
+  /* --- Radien --- */
+  --radius-klein: 6px;
+  --radius-mittel: 9px;
+  --radius-gross: 12px;
+  --radius-grosser: 14px;
+
+  /* --- Schatten --- */
+  --schatten-karte: 0 1px 3px rgba(1, 105, 111, 0.06), 0 1px 2px rgba(1, 105, 111, 0.04);
+  --schatten-modal: 0 10px 30px rgba(1, 105, 111, 0.18), 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* --- Schrift --- */
+  --schrift: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+
+/* ------------------------------------------------------------
+   2. Globaler Reset
+   ------------------------------------------------------------ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: var(--schrift);
+  color: var(--farbe-text);
+  background: var(--farbe-hg-grau);
+  min-height: 100vh;
+}
+
+
+/* ------------------------------------------------------------
+   3. Standard-Anpassungen für Form-Elemente und Links
+   ------------------------------------------------------------ */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+a {
+  color: var(--farbe-primaer);
+}
+
+
+/* ------------------------------------------------------------
+   4. Wiederverwendbare Helper-Klassen
+   ------------------------------------------------------------ */
+
+/* --- Kategorie-Badges (Pill-Form) --- */
+.kat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.kat-arbeit {
+  background: var(--kat-arbeit-bg);
+  color: var(--kat-arbeit-text);
+}
+
+.kat-schule {
+  background: var(--kat-schule-bg);
+  color: var(--kat-schule-text);
+}
+
+.kat-privat {
+  background: var(--kat-privat-bg);
+  color: var(--kat-privat-text);
+}
+
+
+/* --- Buttons --- */
+
+/* Primärer Button (Teal) — für Hauptaktionen */
+.btn-primaer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: var(--radius-mittel);
+  background: var(--farbe-primaer);
+  color: var(--farbe-hg-weiss);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.btn-primaer:hover {
+  background: #01545a;
+}
+
+.btn-primaer:active {
+  transform: translateY(1px);
+}
+
+.btn-primaer:disabled {
+  background: var(--farbe-text-sehr-hell);
+  cursor: not-allowed;
+}
+
+
+/* Sekundärer Button (weiss mit Rand) — für Nebenaktionen */
+.btn-sekundaer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: 1px solid var(--farbe-border);
+  border-radius: var(--radius-mittel);
+  background: var(--farbe-hg-weiss);
+  color: var(--farbe-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-sekundaer:hover {
+  background: var(--farbe-hg-grauer);
+  border-color: var(--farbe-border-stark);
+}
+
+
+/* Gefahr-Button (rot) — für Löschen / destruktive Aktionen */
+.btn-gefahr {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: var(--radius-mittel);
+  background: var(--farbe-fehler);
+  color: var(--farbe-hg-weiss);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-gefahr:hover {
+  background: #b03838;
+}
