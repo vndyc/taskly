@@ -4,6 +4,8 @@
 
 <h1>Test: Daten aus load()</h1>
 
+<p><strong>Eingeloggt als:</strong> {data.user?.name} ({data.user?.email})</p>
+
 <p>Heutiges Datum: {data.heuteIso}</p>
 <p>Woche von {data.wStartIso} bis {data.wEndeIso}</p>
 <p>Anzahl Tasks in dieser Woche: {data.tasks.length}</p>
