@@ -8,7 +8,8 @@
    hooks.server.js nicht-eingeloggte User schon vorher abfängt.
    ============================================================ */
 
-import { tasksLaden } from '$lib/server/tasks.js';
+import { fail } from '@sveltejs/kit';
+import { tasksLaden, taskAktualisieren, taskLoeschen } from '$lib/server/tasks.js';
 import { alsIsoDatum, heuteIso, wochenStart } from '$lib/datum.js';
 
 export async function load({ locals }) {
@@ -34,3 +35,45 @@ export async function load({ locals }) {
     wEndeIso
   };
 }
+
+
+/* ------------------------------------------------------------
+   Form Actions
+   ------------------------------------------------------------ */
+
+export const actions = {
+  // Toggelt das 'erledigt'-Flag einer Aufgabe.
+  erledigtToggeln: async ({ request, locals }) => {
+    const formdata = await request.formData();
+    const id = formdata.get('id')?.toString();
+    const erledigt = formdata.get('erledigt')?.toString() === 'true';
+
+    if (!id) {
+      return fail(400, { fehler: 'ID fehlt' });
+    }
+
+    const aktualisiert = await taskAktualisieren(locals.user.id, id, { erledigt });
+    if (!aktualisiert) {
+      return fail(404, { fehler: 'Aufgabe nicht gefunden' });
+    }
+
+    return { erfolg: true };
+  },
+
+  // Löscht eine Aufgabe.
+  loeschen: async ({ request, locals }) => {
+    const formdata = await request.formData();
+    const id = formdata.get('id')?.toString();
+
+    if (!id) {
+      return fail(400, { fehler: 'ID fehlt' });
+    }
+
+    const erfolg = await taskLoeschen(locals.user.id, id);
+    if (!erfolg) {
+      return fail(404, { fehler: 'Aufgabe nicht gefunden' });
+    }
+
+    return { erfolg: true };
+  }
+};
