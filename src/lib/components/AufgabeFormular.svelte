@@ -35,7 +35,7 @@
   const fehler = $derived(form?.fehler ?? null);
 </script>
 
-<form method="POST" action={speichernAction} use:enhance class="formular">
+<form method="POST" action={speichernAction ?? undefined} use:enhance class="formular">
   <header>
     <h1>{titelDesFormulars}</h1>
     <p class="untertitel">{untertitel}</p>
