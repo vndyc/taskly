@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p 'c:/VS Code/Prototyping/taskly/src/routes/api/tasks')",
+      "Bash(mkdir -p 'c:/VS Code/Prototyping/taskly/src/routes/aufgabe/[id]')"
+    ],
+    "additionalDirectories": [
+      "c:\\VS Code\\Prototyping\\taskly\\src\\routes\\api",
+      "c:\\VS Code\\Prototyping\\taskly\\src\\routes\\aufgabe"
+    ]
+  }
+}
