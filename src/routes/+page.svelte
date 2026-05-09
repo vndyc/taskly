@@ -38,7 +38,7 @@
   });
 
   function neueAufgabe() {
-    goto('/aufgabe/neu');
+    goto('/aufgabe/neu?zurueck=/');
   }
 </script>
 

@@ -7,14 +7,27 @@ import { redirect, fail } from '@sveltejs/kit';
 import { formularZuTask, taskErstellen } from '$lib/server/tasks.js';
 import { heuteIso } from '$lib/datum.js';
 
-export function load() {
+export function load({ url }) {
+  const datumParam = url.searchParams.get('datum');
+  const startDatum =
+    datumParam && /^\d{4}-\d{2}-\d{2}$/.test(datumParam)
+      ? datumParam
+      : heuteIso();
+
+  // 'zurueck' als optionales Redirect-Ziel.
+  // Whitelist: nur lokale Pfade akzeptieren (Sicherheit gegen Open Redirect).
+  const zurueckRoh = url.searchParams.get('zurueck') ?? '/';
+  const zurueck =
+    zurueckRoh.startsWith('/') && !zurueckRoh.startsWith('//') ? zurueckRoh : '/';
+
   return {
-    heuteIso: heuteIso()
+    heuteIso: startDatum,
+    zurueck
   };
 }
 
 export const actions = {
-  default: async ({ request, locals }) => {
+  default: async ({ request, locals, url }) => {
     const formdata = await request.formData();
     const ergebnis = formularZuTask(formdata);
 
@@ -33,7 +46,12 @@ export const actions = {
     // Task erstellen
     await taskErstellen(locals.user.id, ergebnis.daten);
 
-    // Zurück zum Dashboard
-    throw redirect(303, '/');
+    // Redirect-Ziel aus URL lesen, mit Sicherheits-Whitelist
+    // (nur lokale Pfade, kein "//host" und kein externer URL).
+    const zurueckRoh = url.searchParams.get('zurueck') ?? '/';
+    const zurueck =
+      zurueckRoh.startsWith('/') && !zurueckRoh.startsWith('//') ? zurueckRoh : '/';
+
+    throw redirect(303, zurueck);
   }
 };
