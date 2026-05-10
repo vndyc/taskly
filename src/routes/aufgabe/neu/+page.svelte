@@ -19,6 +19,7 @@
     {startwerte}
     speichernAction={null}
     speichernText="Aufgabe speichern"
+    zurueck={data.zurueck}
     {form}
   />
 </div>

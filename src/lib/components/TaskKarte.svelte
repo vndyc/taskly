@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
 
   // --- Props ---
-  let { task } = $props();
+  let { task, zurueck = '/' } = $props();
 
   // Anzeige-Namen für die Kategorien (gross geschrieben).
   const KATEGORIE_NAMEN = {
@@ -14,7 +14,7 @@
 
   /** Öffnet die Detail-/Bearbeiten-Seite der Aufgabe. */
   function oeffnen() {
-    goto(`/aufgabe/${task.id}`);
+    goto(`/aufgabe/${task.id}?zurueck=${encodeURIComponent(zurueck)}`);
   }
 
   /**

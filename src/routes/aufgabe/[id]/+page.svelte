@@ -33,6 +33,7 @@
     loeschenAction="?/loeschen"
     speichernText="Änderungen speichern"
     zeigeLoeschen={true}
+    zurueck={data.zurueck}
     {form}
   />
 </div>

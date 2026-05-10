@@ -1,17 +1,22 @@
 <script>
   import { enhance } from '$app/forms';
+  import LoeschenModal from '$lib/components/LoeschenModal.svelte';
 
   // --- Props ---
   let {
     titelDesFormulars = 'Neue Aufgabe erstellen',
     untertitel = 'Alle mit * markierten Felder sind Pflichtfelder',
     startwerte = {},
-    speichernAction = '?/default',
+    speichernAction = null,
     loeschenAction = null,
     speichernText = 'Aufgabe speichern',
     form = null,
-    zeigeLoeschen = false
+    zeigeLoeschen = false,
+    zurueck = '/'
   } = $props();
+
+  // --- Lokaler State ---
+  let zeigeLoeschModal = $state(false);
 
   // Auswählbare Kategorien (als Pill-Buttons gerendert).
   const KATEGORIEN = [
@@ -105,23 +110,29 @@
   </label>
 
   <div class="aktionen">
-    <a href="/" class="btn-sekundaer">Abbrechen</a>
+    <a href={zurueck} class="btn-sekundaer">Abbrechen</a>
     <button type="submit" class="btn-primaer">{speichernText}</button>
   </div>
 </form>
 
 {#if zeigeLoeschen && loeschenAction}
-  <form method="POST" action={loeschenAction} use:enhance class="loeschen-form">
+  <div class="loeschen-form">
     <button
-      type="submit"
+      type="button"
       class="btn-gefahr"
-      onclick={(e) => {
-        if (!confirm('Diese Aufgabe wirklich löschen?')) e.preventDefault();
-      }}
+      onclick={() => (zeigeLoeschModal = true)}
     >
       Aufgabe löschen
     </button>
-  </form>
+  </div>
+{/if}
+
+{#if zeigeLoeschModal && startwerte.id}
+  <LoeschenModal
+    task={startwerte}
+    action={loeschenAction}
+    onSchliessen={() => (zeigeLoeschModal = false)}
+  />
 {/if}
 
 <style>

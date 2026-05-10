@@ -126,7 +126,11 @@
     {:else}
       <div class="liste">
         {#each data.tagesTasks as task (task.id)}
-          <TaskZeile {task} onVerschieben={(t) => (zuVerschieben = t)} />
+          <TaskZeile
+            {task}
+            onVerschieben={(t) => (zuVerschieben = t)}
+            zurueck="/kalender/{data.datum}"
+          />
         {/each}
       </div>
     {/if}

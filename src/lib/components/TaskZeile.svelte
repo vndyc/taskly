@@ -1,8 +1,9 @@
 <script>
   import { enhance } from '$app/forms';
+  import LoeschenModal from '$lib/components/LoeschenModal.svelte';
 
   // --- Props ---
-  let { task, onVerschieben } = $props();
+  let { task, onVerschieben, zurueck = '/' } = $props();
 
   const KATEGORIE_NAMEN = {
     arbeit: 'Arbeit',
@@ -12,6 +13,7 @@
 
   // --- Lokaler State ---
   let menuOffen = $state(false);
+  let zeigeLoeschModal = $state(false);
 
   function menuToggle() {
     menuOffen = !menuOffen;
@@ -24,12 +26,6 @@
   function verschieben() {
     menuSchliessen();
     onVerschieben?.(task);
-  }
-
-  function loeschenBestaetigen(event) {
-    if (!confirm(`"${task.titel}" wirklich löschen?`)) {
-      event.preventDefault();
-    }
   }
 </script>
 
@@ -87,7 +83,7 @@
       {#if menuOffen}
         <div class="menu" role="menu">
           <a
-            href="/aufgabe/{task.id}"
+            href="/aufgabe/{task.id}?zurueck={encodeURIComponent(zurueck)}"
             class="menu-item"
             onclick={menuSchliessen}
           >
@@ -100,26 +96,29 @@
           >
             Verschieben
           </button>
-          <form
-            method="POST"
-            action="?/loeschen"
-            use:enhance
-            onsubmit={menuSchliessen}
+          <button
+            type="button"
+            class="menu-item gefahr"
+            onclick={() => {
+              menuSchliessen();
+              zeigeLoeschModal = true;
+            }}
           >
-            <input type="hidden" name="id" value={task.id} />
-            <button
-              type="submit"
-              class="menu-item gefahr"
-              onclick={loeschenBestaetigen}
-            >
-              Löschen
-            </button>
-          </form>
+            Löschen
+          </button>
         </div>
       {/if}
     </div>
   </div>
 </div>
+
+{#if zeigeLoeschModal}
+  <LoeschenModal
+    {task}
+    action="?/loeschen"
+    onSchliessen={() => (zeigeLoeschModal = false)}
+  />
+{/if}
 
 <style>
   .zeile {
