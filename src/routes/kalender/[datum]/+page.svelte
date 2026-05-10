@@ -45,6 +45,17 @@
   // Set aller Iso-Datumswerte mit Tasks (für visuelle Markierung im Mini-Kalender).
   const tagesIsoSet = $derived(new Set(data.monatTasks.map((t) => t.faelligkeitsDatum)));
 
+  // ISO-Datum des 1. im Vor- bzw. Folgemonat (für Mini-Kalender-Navigation).
+  const vorherigerMonat = $derived.by(() => {
+    const d = new Date(datumObj.getFullYear(), datumObj.getMonth() - 1, 1);
+    return alsIsoDatum(d);
+  });
+
+  const naechsterMonat = $derived.by(() => {
+    const d = new Date(datumObj.getFullYear(), datumObj.getMonth() + 1, 1);
+    return alsIsoDatum(d);
+  });
+
   function neueAufgabe() {
     const zurueck = encodeURIComponent(`/kalender/${data.datum}`);
     goto(`/aufgabe/neu?datum=${data.datum}&zurueck=${zurueck}`);
@@ -65,16 +76,27 @@
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="sidebar-titel">{miniKalender.monatName} {miniKalender.jahr}</div>
     <div class="sidebar-sub">Tagesansicht</div>
 
     <div class="mini-kal">
-      <div class="mini-kopf">
+      <div class="monats-nav">
+        <a
+          class="monats-btn"
+          href="/kalender/{vorherigerMonat}"
+          aria-label="Vorheriger Monat"
+        >‹</a>
+        <span class="monats-label">{miniKalender.monatName} {miniKalender.jahr}</span>
+        <a
+          class="monats-btn"
+          href="/kalender/{naechsterMonat}"
+          aria-label="Nächster Monat"
+        >›</a>
+      </div>
+
+      <div class="mini-grid">
         {#each WOCHENTAGE_KURZ as wt (wt)}
           <div class="mini-zelle kopf">{wt}</div>
         {/each}
-      </div>
-      <div class="mini-grid">
         {#each miniKalender.tage as zelle, i (i)}
           {#if zelle === null}
             <div class="mini-zelle leer"></div>
@@ -156,15 +178,39 @@
     overflow: hidden;
     min-width: 0;
   }
-  .sidebar-titel {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--farbe-text);
-  }
   .sidebar-sub {
     font-size: 12px;
     color: var(--farbe-text-sehr-hell);
     margin-bottom: 20px;
+  }
+
+  /* --- Monats-Navigation --- */
+  .monats-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .monats-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    background: var(--farbe-hg-grauer);
+    font-size: 14px;
+    color: var(--farbe-text-mittel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+  .monats-btn:hover {
+    background: var(--farbe-border);
+    text-decoration: none;
+  }
+  .monats-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--farbe-text);
   }
 
   /* --- Mini-Kalender --- */
@@ -177,13 +223,6 @@
     width: 100%;
     box-sizing: border-box;
   }
-  .mini-kopf {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-  margin-bottom: 4px;
-  width: 100%;
-}
 .mini-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
