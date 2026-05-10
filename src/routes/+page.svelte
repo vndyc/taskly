@@ -1,6 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
   import TaskKarte from '$lib/components/TaskKarte.svelte';
+  import UeberfaelligKarte from '$lib/components/UeberfaelligKarte.svelte';
   import { alsHeaderDatum } from '$lib/datum.js';
 
   // --- Props ---
@@ -137,6 +138,26 @@
   </aside>
 
   <section class="main">
+    {#if data.ueberfaellig.length > 0}
+      <div class="ueberfaellig-sektion">
+        <div class="ueberfaellig-kopf">
+          <h2>
+            <span class="warnung-icon" aria-hidden="true">⚠</span>
+            Überfällige Aufgaben
+            <span class="anzahl">({data.ueberfaellig.length})</span>
+          </h2>
+          <p class="ueberfaellig-sub">
+            Diese Aufgaben sind in der Vergangenheit fällig und noch offen.
+          </p>
+        </div>
+        <div class="ueberfaellig-liste">
+          {#each data.ueberfaellig as task (task.id)}
+            <UeberfaelligKarte {task} />
+          {/each}
+        </div>
+      </div>
+    {/if}
+
     <div class="kopf">
       <h1>Heutige Tasks – {heuteHeader}</h1>
       <button type="button" class="btn-primaer" onclick={neueAufgabe}>
@@ -304,6 +325,46 @@
     color: var(--farbe-text-extra-hell);
     text-transform: uppercase;
     letter-spacing: 1.5px;
+  }
+
+  /* --- Sektion: Überfällige Aufgaben --- */
+  .ueberfaellig-sektion {
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--farbe-border);
+  }
+  .ueberfaellig-kopf {
+    margin-bottom: 16px;
+  }
+  .ueberfaellig-kopf h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--farbe-fehler);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 4px;
+  }
+  .warnung-icon {
+    font-size: 16px;
+  }
+  .anzahl {
+    font-size: 13px;
+    color: var(--farbe-text-extra-hell);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .ueberfaellig-sub {
+    font-size: 13px;
+    color: var(--farbe-text-hell);
+  }
+  .ueberfaellig-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   /* --- Filter-Chips --- */

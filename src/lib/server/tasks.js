@@ -80,7 +80,9 @@ export function formularZuTask(formdata) {
  * Filter:
  *   { datum }            → genau dieser Tag
  *   { von, bis }         → Datumsbereich (überschreibt 'datum')
+ *   { bisExklusiv }      → alle Tasks strikt vor diesem Datum (überfällig)
  *   { kategorie }        → nur diese Kategorie (wenn gültig)
+ *   { nurOffen }         → wenn true, nur Tasks mit erledigt === false
  */
 export async function tasksLaden(userId, filter = {}) {
   const tasks = await getTasksCollection();
@@ -92,8 +94,14 @@ export async function tasksLaden(userId, filter = {}) {
   if (filter.von && filter.bis) {
     dbFilter.faelligkeitsDatum = { $gte: filter.von, $lte: filter.bis };
   }
+  if (filter.bisExklusiv) {
+    dbFilter.faelligkeitsDatum = { $lt: filter.bisExklusiv };
+  }
   if (filter.kategorie && ERLAUBTE_KATEGORIEN.includes(filter.kategorie)) {
     dbFilter.kategorie = filter.kategorie;
+  }
+  if (filter.nurOffen === true) {
+    dbFilter.erledigt = false;
   }
 
   const liste = await tasks

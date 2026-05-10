@@ -40,8 +40,15 @@ export async function load({ locals, url }) {
     bis: wEndeIso
   });
 
+  // --- Überfällige Tasks (vor heute, noch offen) ---
+  const ueberfaellig = await tasksLaden(locals.user.id, {
+    bisExklusiv: heuteIso(),
+    nurOffen: true
+  });
+
   return {
     tasks,
+    ueberfaellig,
     heuteIso: heuteIso(),
     wStartIso,
     wEndeIso,
