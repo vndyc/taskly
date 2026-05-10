@@ -9,10 +9,15 @@
    ============================================================ */
 
 import { fail } from '@sveltejs/kit';
-import { tasksLaden, taskAktualisieren, taskLoeschen } from '$lib/server/tasks.js';
+import {
+  tasksLaden,
+  taskAktualisieren,
+  taskLoeschen,
+  ERLAUBTE_KATEGORIEN
+} from '$lib/server/tasks.js';
 import { alsIsoDatum, heuteIso, wochenStart } from '$lib/datum.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
   // --- Aktuelle Woche bestimmen (Montag bis Sonntag) ---
   const heute = new Date();
   const wStart = wochenStart(heute);
@@ -22,7 +27,14 @@ export async function load({ locals }) {
   const wStartIso = alsIsoDatum(wStart);
   const wEndeIso = alsIsoDatum(wEnde);
 
-  // --- Alle Tasks der aktuellen Woche laden ---
+  // --- Filter aus URL ---
+  const kategorie = url.searchParams.get('kategorie');
+  const aktiverFilter = ERLAUBTE_KATEGORIEN.includes(kategorie) ? kategorie : 'alle';
+
+  // --- Tasks laden ---
+  // Wir laden bewusst ALLE Tasks der Woche (ohne Kategorie-Filter
+  // auf Server-Seite), weil die Stats alle Kategorien zählen sollen.
+  // Der Filter wird im Frontend auf die heutigen Tasks angewendet.
   const tasks = await tasksLaden(locals.user.id, {
     von: wStartIso,
     bis: wEndeIso
@@ -32,7 +44,8 @@ export async function load({ locals }) {
     tasks,
     heuteIso: heuteIso(),
     wStartIso,
-    wEndeIso
+    wEndeIso,
+    aktiverFilter
   };
 }
 

@@ -8,9 +8,21 @@
 
   const heuteHeader = alsHeaderDatum(new Date());
 
+  // Anzeige-Namen für die Kategorien (gross geschrieben).
+  const KATEGORIE_NAMEN = { arbeit: 'Arbeit', schule: 'Schule', privat: 'Privat' };
+
   // --- Abgeleitete Werte ---
+  // Achtung: heutigeTasks bleibt UNGEFILTERT — die Stats sollen
+  // immer alle Kategorien zählen. Für die Anzeige nutzen wir
+  // heutigeTasksGefiltert weiter unten.
   const heutigeTasks = $derived(
     data.tasks.filter((t) => t.faelligkeitsDatum === data.heuteIso)
+  );
+
+  const heutigeTasksGefiltert = $derived(
+    data.aktiverFilter === 'alle'
+      ? heutigeTasks
+      : heutigeTasks.filter((t) => t.kategorie === data.aktiverFilter)
   );
 
   const heuteErledigt = $derived(
@@ -19,6 +31,12 @@
 
   const wocheErledigt = $derived(
     data.tasks.filter((t) => t.erledigt).length
+  );
+
+  const wocheGesamt = $derived(data.tasks.length);
+
+  const wochenProzent = $derived(
+    wocheGesamt > 0 ? (wocheErledigt / wocheGesamt) * 100 : 0
   );
 
   // Tageszeit-abhängige Begrüssung mit User-Namen.
@@ -39,6 +57,13 @@
 
   function neueAufgabe() {
     goto('/aufgabe/neu?zurueck=/');
+  }
+
+  /** Baut die Filter-URL: '/' bei 'alle', sonst ?kategorie=... */
+  function filterUrl(filter) {
+    const params = new URLSearchParams();
+    if (filter !== 'alle') params.set('kategorie', filter);
+    return params.toString() ? `?${params}` : '/';
   }
 </script>
 
@@ -79,7 +104,16 @@
       <div class="stat-label">Erledigt diese Woche</div>
       <div class="stat-wert">
         <strong>{wocheErledigt}</strong>
+        <span class="stat-context">von {wocheGesamt} gesamt</span>
       </div>
+      {#if wocheGesamt > 0}
+        <div class="wochen-bar">
+          <div
+            class="wochen-bar-fuellung"
+            style="width: {wochenProzent}%"
+          ></div>
+        </div>
+      {/if}
     </div>
 
     <div class="kat-block">
@@ -110,18 +144,35 @@
       </button>
     </div>
 
-    {#if heutigeTasks.length === 0}
+    <div class="filter">
+      {#each ['alle', 'arbeit', 'schule', 'privat'] as f (f)}
+        <a
+          class="chip"
+          class:aktiv={data.aktiverFilter === f}
+          href={filterUrl(f)}
+        >
+          {f === 'alle' ? 'Alle' : KATEGORIE_NAMEN[f]}
+        </a>
+      {/each}
+    </div>
+
+    {#if heutigeTasksGefiltert.length === 0}
       <div class="leer">
-        <div class="leer-emoji" aria-hidden="true">🌱</div>
-        <p class="leer-titel">Heute ist noch unbeschrieben</p>
-        <p class="leer-sub">Was möchtest du heute angehen?</p>
-        <button type="button" class="btn-primaer" onclick={neueAufgabe}>
-          Erste Aufgabe erstellen
-        </button>
+        {#if heutigeTasks.length === 0}
+          <div class="leer-emoji" aria-hidden="true">🌱</div>
+          <p class="leer-titel">Heute ist noch unbeschrieben</p>
+          <p class="leer-sub">Was möchtest du heute angehen?</p>
+          <button type="button" class="btn-primaer" onclick={neueAufgabe}>
+            Erste Aufgabe erstellen
+          </button>
+        {:else}
+          <p>Keine Aufgaben in dieser Kategorie heute.</p>
+          <a href="/" class="btn-sekundaer">Filter zurücksetzen</a>
+        {/if}
       </div>
     {:else}
       <div class="task-grid">
-        {#each heutigeTasks as task (task.id)}
+        {#each heutigeTasksGefiltert as task (task.id)}
           <TaskKarte {task} />
         {/each}
       </div>
@@ -181,6 +232,26 @@
     color: var(--farbe-text-extra-hell);
     font-weight: 600;
   }
+  .stat-context {
+    font-size: 12px;
+    color: var(--farbe-text-extra-hell);
+    font-weight: 500;
+    margin-left: 6px;
+  }
+  .wochen-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--farbe-hg-grauer);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .wochen-bar-fuellung {
+    height: 100%;
+    background: var(--farbe-primaer);
+    border-radius: 99px;
+    transition: width 0.3s ease;
+  }
 
   /* --- Kategorien-Block --- */
   .kat-block {
@@ -233,6 +304,33 @@
     color: var(--farbe-text-extra-hell);
     text-transform: uppercase;
     letter-spacing: 1.5px;
+  }
+
+  /* --- Filter-Chips --- */
+  .filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--farbe-border);
+    background: var(--farbe-hg-weiss);
+    color: var(--farbe-text-mittel);
+    text-decoration: none;
+  }
+  .chip:hover {
+    text-decoration: none;
+    border-color: var(--farbe-text-extra-hell);
+  }
+  .chip.aktiv {
+    background: var(--farbe-primaer);
+    border-color: var(--farbe-primaer);
+    color: var(--farbe-hg-weiss);
   }
 
   .task-grid {
