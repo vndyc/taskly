@@ -176,3 +176,56 @@ export async function taskLoeschen(userId, id) {
   const ergebnis = await tasks.deleteOne({ _id: new ObjectId(id), userId });
   return ergebnis.deletedCount > 0;
 }
+
+
+/* ------------------------------------------------------------
+   Suche
+   ------------------------------------------------------------ */
+
+/**
+ * Sucht Tasks nach Suchbegriff in titel, beschreibung und notiz.
+ * Optional gefiltert nach Kategorie und Status.
+ * @param {string} userId
+ * @param {object} optionen
+ * @param {string} optionen.suchbegriff - Volltextsuche, kann leer sein
+ * @param {string} [optionen.kategorie] - 'arbeit' | 'schule' | 'privat'
+ * @param {string} [optionen.status] - 'offen' | 'erledigt'
+ * @returns {Promise<Array>}
+ */
+export async function tasksSuchen(userId, optionen = {}) {
+  const tasks = await getTasksCollection();
+  const dbFilter = { userId };
+
+  // --- Volltext-Filter (nur wenn Suchbegriff vorhanden) ---
+  const begriff = optionen.suchbegriff?.trim();
+  if (begriff) {
+    // Regex-Sonderzeichen escapen, damit sie wörtlich gesucht werden
+    // (sonst könnten User-Eingaben wie ".*" das Verhalten ändern).
+    const escaped = begriff.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = { $regex: escaped, $options: 'i' };
+    dbFilter.$or = [
+      { titel: regex },
+      { beschreibung: regex },
+      { notiz: regex }
+    ];
+  }
+
+  // --- Kategorie-Filter ---
+  if (optionen.kategorie && ERLAUBTE_KATEGORIEN.includes(optionen.kategorie)) {
+    dbFilter.kategorie = optionen.kategorie;
+  }
+
+  // --- Status-Filter ---
+  if (optionen.status === 'offen') {
+    dbFilter.erledigt = false;
+  } else if (optionen.status === 'erledigt') {
+    dbFilter.erledigt = true;
+  }
+
+  const liste = await tasks
+    .find(dbFilter)
+    .sort({ faelligkeitsDatum: -1, erstelltAm: -1 })
+    .toArray();
+
+  return liste.map(taskFormatieren);
+}

@@ -67,6 +67,13 @@
     >
       Kalender
     </a>
+    <a
+      href="/suche"
+      class="nav-link"
+      class:active={istAktiv('/suche')}
+    >
+      Suche
+    </a>
   </div>
 
   <div class="nav-right">
