@@ -1,11 +1,17 @@
 // src/routes/kalender/[datum]/+page.server.js
 // Lädt Tasks für den ausgewählten Tag und für den Monat
 // (für Mini-Kalender-Markierungen).
-// Actions: erledigtToggeln, loeschen, verschieben.
+// Actions: erledigtToggeln, loeschen, verschieben, duplizieren.
 
 import { error, fail } from '@sveltejs/kit';
-import { tasksLaden, taskAktualisieren, taskLoeschen } from '$lib/server/tasks.js';
-import { alsIsoDatum, ausIsoDatum } from '$lib/datum.js';
+import {
+  tasksLaden,
+  taskAktualisieren,
+  taskLoeschen,
+  taskLadenById,
+  taskErstellen
+} from '$lib/server/tasks.js';
+import { alsIsoDatum, ausIsoDatum, heuteIso } from '$lib/datum.js';
 
 export async function load({ params, locals }) {
   // --- Validierung des URL-Parameters ---
@@ -73,6 +79,27 @@ export const actions = {
       faelligkeitsDatum: neuesDatum
     });
     if (!aktualisiert) return fail(404, { fehler: 'Aufgabe nicht gefunden' });
+
+    return { erfolg: true };
+  },
+
+  // Erstellt eine Kopie der Aufgabe mit heutigem Datum und erledigt = false.
+  duplizieren: async ({ request, locals }) => {
+    const formdata = await request.formData();
+    const id = formdata.get('id')?.toString();
+
+    if (!id) return fail(400, { fehler: 'ID fehlt' });
+
+    const original = await taskLadenById(locals.user.id, id);
+    if (!original) return fail(404, { fehler: 'Aufgabe nicht gefunden' });
+
+    await taskErstellen(locals.user.id, {
+      titel: original.titel,
+      beschreibung: original.beschreibung,
+      kategorie: original.kategorie,
+      faelligkeitsDatum: heuteIso(),
+      notiz: original.notiz
+    });
 
     return { erfolg: true };
   }

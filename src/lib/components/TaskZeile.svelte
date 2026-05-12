@@ -27,6 +27,20 @@
     menuSchliessen();
     onVerschieben?.(task);
   }
+
+  /**
+   * use:enhance-Callback fürs Duplizieren-Form. Schliesst das Menü
+   * erst NACH der Server-Antwort (sonst würde der Submit abbrechen,
+   * weil das Form aus dem DOM verschwindet, bevor es absenden kann).
+   */
+  function duplizierenHandler() {
+    return async ({ result, update }) => {
+      await update();
+      if (result.type === 'success' || result.type === 'redirect') {
+        menuSchliessen();
+      }
+    };
+  }
 </script>
 
 <div class="zeile" class:erledigt={task.erledigt}>
@@ -96,6 +110,16 @@
           >
             Verschieben
           </button>
+          <form
+            method="POST"
+            action="?/duplizieren"
+            use:enhance={duplizierenHandler}
+          >
+            <input type="hidden" name="id" value={task.id} />
+            <button type="submit" class="menu-item">
+              Duplizieren
+            </button>
+          </form>
           <button
             type="button"
             class="menu-item gefahr"
